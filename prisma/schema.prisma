@@ -1,0 +1,200 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Used for migrations
+}
+
+model WebsiteProfile {
+  name        String  @unique
+  description String?
+  logoUrl     String?
+  address     String?
+  phone       String?
+  email       String?
+  socialLinks Json?
+  gallery     Json?
+
+  isUserRegistrationEnabled Boolean @default(true)
+  isBlogEnabled             Boolean @default(true)
+  isProductEnabled          Boolean @default(true)
+  isCommentEnabled          Boolean @default(true)
+  isLikeEnabled             Boolean @default(true)
+  isReviewEnabled           Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  MANAGER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model user {
+  id            String     @id @default(cuid())
+  userName      String     @unique
+  fullName      String
+  email         String     @unique
+  password      String
+  role          UserRole[] @default([MEMBER])
+  emailVerified Boolean    @default(false)
+
+  userProfile userProfile?
+  attachments attachment[]
+  posts       Post[]
+  products    product[]
+  comments    comment[]
+  likes       like[]
+  reviews     review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model userProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio         String?
+  location    String?
+  dateOfBirth DateTime?
+  phoneNumber String?
+  avatarUrl   String?
+  socialLinks Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  productId String
+  product   product @relation(fields: [productId], references: [id])
+  postId    String
+  post      Post    @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model attachment {
+  id     String @id @default(cuid())
+  userId String
+  user   user   @relation(fields: [userId], references: [id])
+
+  fileName String
+  fileUrl  String
+  fileType String
+  fileSize Int
+  fileHash String
+
+  productId String?
+  product   product? @relation(fields: [productId], references: [id])
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id       String  @id @default(cuid())
+  authorId String?
+  author   user?   @relation(fields: [authorId], references: [id])
+
+  title    String
+  slug     String   @unique
+  content  String?
+  imageUrl String?
+  videoUrl String?
+  status   Status   @default(DRAFT)
+  tags     String[] @default([])
+
+  attachments attachment[]
+  categories  category[]
+  comments    comment[]
+  likes       like[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model product {
+  id        String  @id @default(cuid())
+  creatorId String?
+  creator   user?   @relation(fields: [creatorId], references: [id])
+
+  name        String  @unique
+  description String?
+  price       Float
+  stock       Int     @default(0)
+  imageUrl    String?
+
+  attachments attachment[]
+  category    category[]
+  reviews     review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model comment {
+  id       String @id @default(cuid())
+  authorId String
+  author   user   @relation(fields: [authorId], references: [id])
+
+  content String
+  postId  String?
+  post    Post?   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model like {
+  id     String @id @default(cuid())
+  userId String
+  user   user   @relation(fields: [userId], references: [id])
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model review {
+  id     String @id @default(cuid())
+  userId String
+  user   user   @relation(fields: [userId], references: [id])
+
+  content   String
+  rating    Int     @default(5)
+  productId String
+  product   product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
