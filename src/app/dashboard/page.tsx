@@ -1,3 +1,10 @@
+import TiptapEditor from '@/components/TiptapEditor';
+
 export default function DashboardPage() {
-  return <h2>Dashboard Home</h2>;
+  return (
+    <div>
+      <h2>Dashboard Home</h2>
+      <TiptapEditor />
+    </div>
+  );
 }
