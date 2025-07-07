@@ -125,13 +125,12 @@ model Post {
   authorId String?
   author   user?   @relation(fields: [authorId], references: [id])
 
-  title    String
-  slug     String   @unique
-  content  String?
-  imageUrl String?
-  videoUrl String?
-  status   Status   @default(DRAFT)
-  tags     String[] @default([])
+  title     String
+  slug      String   @unique
+  content   String?
+  thumbnail String?
+  status    Status   @default(DRAFT)
+  tags      String[] @default([])
 
   attachments attachment[]
   categories  category[]

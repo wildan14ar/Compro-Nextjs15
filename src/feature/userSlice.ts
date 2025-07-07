@@ -62,6 +62,31 @@ export const createUser = createAsyncThunk<User,
   }
 )
 
+export const updateUser = createAsyncThunk<User,
+  { id: string; userName: string; fullName: string; email: string }
+>(
+  'user/update',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/user/${payload.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to update user')
+      }
+      return (await res.json()) as User
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return rejectWithValue(e.message)
+      }
+      return rejectWithValue('An unknown error occurred')
+    }
+  }
+)
+
 export const deleteUser = createAsyncThunk<string, string>(
   'user/delete',
   async (id, { rejectWithValue }) => {

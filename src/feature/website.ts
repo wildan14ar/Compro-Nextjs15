@@ -56,15 +56,15 @@ export const fetchCompanyProfile = createAsyncThunk<
   }
 )
 
-export const createCompanyProfile = createAsyncThunk<
+export const upsertCompanyProfile = createAsyncThunk<
   CompanyProfile,
   Omit<Partial<CompanyProfile>, 'id' | 'createdAt' | 'updatedAt'>,
   { rejectValue: string }
 >(
-  'companyProfile/create',
+  'companyProfile/upsert',
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetch('/api/company-profile', {
+      const res = await fetch('/api/website', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -72,30 +72,6 @@ export const createCompanyProfile = createAsyncThunk<
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.error || 'Failed to create profile')
-      }
-      return (await res.json()) as CompanyProfile
-    } catch (e: unknown) {
-      return rejectWithValue(e instanceof Error ? e.message : 'Unknown error')
-    }
-  }
-)
-
-export const updateCompanyProfile = createAsyncThunk<
-  CompanyProfile,
-  Partial<CompanyProfile>,
-  { rejectValue: string }
->(
-  'companyProfile/update',
-  async (payload, { rejectWithValue }) => {
-    try {
-      const res = await fetch('/api/company-profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || 'Failed to update profile')
       }
       return (await res.json()) as CompanyProfile
     } catch (e: unknown) {
@@ -121,21 +97,11 @@ const companyProfileSlice = createSlice({
 
     // create
     builder
-      .addCase(createCompanyProfile.pending, (s) => { s.loading = true; s.error = null })
-      .addCase(createCompanyProfile.fulfilled, (s, a: PayloadAction<CompanyProfile>) => {
+      .addCase(upsertCompanyProfile.pending, (s) => { s.loading = true; s.error = null })
+      .addCase(upsertCompanyProfile.fulfilled, (s, a: PayloadAction<CompanyProfile>) => {
         s.loading = false; s.data = a.payload
       })
-      .addCase(createCompanyProfile.rejected, (s, a) => {
-        s.loading = false; s.error = a.payload as string
-      })
-
-    // update
-    builder
-      .addCase(updateCompanyProfile.pending, (s) => { s.loading = true; s.error = null })
-      .addCase(updateCompanyProfile.fulfilled, (s, a: PayloadAction<CompanyProfile>) => {
-        s.loading = false; s.data = a.payload
-      })
-      .addCase(updateCompanyProfile.rejected, (s, a) => {
+      .addCase(upsertCompanyProfile.rejected, (s, a) => {
         s.loading = false; s.error = a.payload as string
       })
   },

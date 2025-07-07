@@ -7,8 +7,7 @@ export interface Post {
   title: string
   slug: string
   content: string
-  imageUrl?: string
-  videoUrl?: string
+  thumbnail?: string
   status: 'DRAFT' | 'PUBLISHED'
   tags: string[]
   categories: { id: string; name: string }[]
@@ -45,14 +44,29 @@ export const fetchPost = createAsyncThunk<Post[]>(
   }
 )
 
+export const fetchPostById = createAsyncThunk<Post, string>(
+  'post/fetchById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/post/${id}`)
+      if (!res.ok) throw new Error('Failed to fetch post by ID')
+      return (await res.json()) as Post
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return rejectWithValue(e.message)
+      }
+      return rejectWithValue('An unknown error occurred')
+    }
+  }
+)
+
 export const createPost = createAsyncThunk<Post,
   {
     authorId: string
     title: string
     slug: string
     content: string
-    imageUrl?: string
-    videoUrl?: string
+    thumbnail?: string
     status?: 'DRAFT' | 'PUBLISHED'
     tags?: string[]
     categoryIds?: string[]
@@ -69,6 +83,40 @@ export const createPost = createAsyncThunk<Post,
       if (!res.ok) {
         const err = await res.json()
         throw new Error(err.error || 'Failed to create post')
+      }
+      return (await res.json()) as Post
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return rejectWithValue(e.message)
+      }
+      return rejectWithValue('An unknown error occurred')
+    }
+  }
+)
+
+export const updatePost = createAsyncThunk<Post,
+  {
+    id: string
+    title: string
+    slug: string
+    content: string
+    thumbnail?: string
+    status?: 'DRAFT' | 'PUBLISHED'
+    tags?: string[]
+    categoryIds?: string[]
+  }
+>(
+  'post/update',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/post/${payload.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to update post')
       }
       return (await res.json()) as Post
     } catch (e: unknown) {
@@ -118,6 +166,26 @@ const postSlice = createSlice({
         state.loading = false
         state.error = payload as string
       })
+
+      // FETCH BY ID
+      .addCase(fetchPostById.pending, state => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPostById.fulfilled, (state, { payload }) => {
+        state.loading = false
+        const index = state.items.findIndex(p => p.id === payload.id)
+        if (index >= 0) {
+          state.items[index] = payload // Update existing post
+        } else {
+          state.items.push(payload) // Add new post if not found
+        }
+      })
+      .addCase(fetchPostById.rejected, (state, { payload }) => {
+        state.loading = false
+        state.error = payload as string
+      })
+
       // CREATE
       .addCase(createPost.pending, state => {
         state.loading = true
@@ -131,6 +199,26 @@ const postSlice = createSlice({
         state.loading = false
         state.error = payload as string
       })
+
+      // UPDATE
+      .addCase(updatePost.pending, state => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updatePost.fulfilled, (state, { payload }) => {
+        state.loading = false
+        const index = state.items.findIndex(p => p.id === payload.id)
+        if (index >= 0) {
+          state.items[index] = payload // Update existing post
+        } else {
+          state.items.push(payload) // Add new post if not found
+        }
+      })
+      .addCase(updatePost.rejected, (state, { payload }) => {
+        state.loading = false
+        state.error = payload as string
+      })
+
       // DELETE
       .addCase(deletePost.pending, state => {
         state.loading = true
