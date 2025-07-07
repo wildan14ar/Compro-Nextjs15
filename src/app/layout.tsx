@@ -42,8 +42,8 @@ export default function RootLayout({
                 navItems={[
                   { name: "Home", path: "/" },
                   { name: "About", path: "/about" },
+                  { name: "Post", path: "/post" },
                   { name: "Contact", path: "/contact" },
-                  { name: "Blog", path: "/post" },
                 ]}
               />
             )}

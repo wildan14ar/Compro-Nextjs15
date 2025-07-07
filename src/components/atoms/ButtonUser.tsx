@@ -24,10 +24,10 @@ export default function ButtonUser() {
   }, [menuRef]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative w-full sm:w-fit mb-3 sm:mb-0" ref={menuRef}>
       {status === "authenticated" ? (
         <button
-          className="px-5 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded"
+          className="w-full px-5 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded"
           onClick={() => setIsOpen(!isOpen)}
         >
           {session.user?.name}
@@ -42,7 +42,7 @@ export default function ButtonUser() {
       )}
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg">
+        <div className="right-0 mt-2 w-full sm:w-48 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded shadow-lg sm:absolute sm:right-0 text-center">
           <ul>
             <li>
               <a
