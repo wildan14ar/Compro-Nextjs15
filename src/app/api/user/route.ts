@@ -1,6 +1,7 @@
 // File: app/api/users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
@@ -14,26 +15,24 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  if (!token || !token.sub) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
-    const { userName, fullName, email, password, role } = await req.json();
-    const newUser = await prisma.user.create({
-      data: { userName, fullName, email, password, role },
+    const { fullName, role, emailVerified } = await req.json();
+    const updated = await prisma.user.update({
+      where: { id: token.sub },
+      data: { fullName, role, emailVerified },
+      include: { userProfile: true },
     });
-    return NextResponse.json(newUser, { status: 201 });
+    return NextResponse.json(updated);
   } catch (error: unknown) {
     console.error(error);
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      (error as { code?: string }).code === 'P2002'
-    ) {
-      return NextResponse.json(
-        { error: 'Username or email already exists' },
-        { status: 400 }
-      );
+    if (typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'P2002') {
+      return NextResponse.json({ error: 'Unique constraint failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: 'Error creating user' }, { status: 500 });
+    return NextResponse.json({ error: 'Error updating user' }, { status: 500 });
   }
 }

@@ -1,14 +1,13 @@
 // File: app/api/posts/[postId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { getToken } from 'next-auth/jwt';
 
 export async function GET(req: NextRequest, { params }: { params: { postId: string } }) {
   const { postId } = params;
   try {
     const post = await prisma.post.findUnique({
-      where: { id: postId },
+      where: { slug: postId },
       include: {
         author: { select: { id: true, userName: true, fullName: true } },
         categories: true,
@@ -28,6 +27,11 @@ export async function GET(req: NextRequest, { params }: { params: { postId: stri
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { postId: string } }) {
+  const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
+  if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { postId } = params;
   try {
     const {
@@ -39,6 +43,15 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
       tags,
       categorypostIds,
     } = await req.json();
+
+    // Check if post exists
+    const existingPost = await prisma.post.findUnique({ where: { id: postId } });
+    if (!existingPost) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+    if (existingPost.authorId !== token.sub) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const updated = await prisma.post.update({
       where: { id: postId },
@@ -68,6 +81,20 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
 
 export async function DELETE(req: NextRequest, { params }: { params: { postId: string } }) {
   const { postId } = params;
+  const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
+  if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  // Check if post exists
+  const existingPost = await prisma.post.findUnique({ where: { id: postId } });
+  if (!existingPost) {
+    return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+  }
+  if (existingPost.authorId !== token.sub) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     await prisma.post.delete({ where: { id: postId } });
     return new NextResponse(null, { status: 204 });

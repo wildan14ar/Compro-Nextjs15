@@ -1,8 +1,7 @@
 // File: app/api/posts/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Status } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { getToken } from 'next-auth/jwt';
 
 export async function GET() {
   try {
@@ -23,26 +22,28 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
+  if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const {
-      authorId,
       title,
       slug,
       content,
       thumbnail,
-      status = Status.DRAFT,
       tags = [],
       categoryIds = [],
     } = await req.json();
 
     const newPost = await prisma.post.create({
       data: {
-        authorId,
+        authorId: token.sub,
         title,
         slug,
         content,
         thumbnail,
-        status,
         tags,
         categories: {
           connect: categoryIds.map((id: string) => ({ id })),

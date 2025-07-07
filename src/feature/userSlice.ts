@@ -8,6 +8,12 @@ export interface User {
   email: string
 }
 
+export interface UserProfile {
+  firstName: string
+  lastName: string
+  bio: string
+}
+
 interface UserState {
   items: User[]
   loading: boolean
@@ -37,21 +43,12 @@ export const fetchUser = createAsyncThunk<User[]>(
   }
 )
 
-export const createUser = createAsyncThunk<User,
-  { userName: string; fullName: string; email: string }
->(
-  'user/create',
-  async (payload, { rejectWithValue }) => {
+export const fetchUserByName = createAsyncThunk<User, string>(
+  'user/fetchByName',
+  async (userName, { rejectWithValue }) => {
     try {
-      const res = await fetch('/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create user')
-      }
+      const res = await fetch(`/api/user/${userName}`)
+      if (!res.ok) throw new Error('Failed to fetch user')
       return (await res.json()) as User
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -68,7 +65,7 @@ export const updateUser = createAsyncThunk<User,
   'user/update',
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetch(`/api/user/${payload.id}`, {
+      const res = await fetch(`/api/user`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -125,16 +122,39 @@ const userSlice = createSlice({
         state.loading = false
         state.error = payload as string
       })
-      // CREATE
-      .addCase(createUser.pending, state => {
+      // FETCH BY NAME
+      .addCase(fetchUserByName.pending, state => {
         state.loading = true
         state.error = null
       })
-      .addCase(createUser.fulfilled, (state, { payload }) => {
+      .addCase(fetchUserByName.fulfilled, (state, { payload }) => {
         state.loading = false
-        state.items.push(payload)
+        const existingUser = state.items.find(u => u.id === payload.id)
+        if (existingUser) {
+          Object.assign(existingUser, payload)
+        } else {
+          state.items.push(payload)
+        }
       })
-      .addCase(createUser.rejected, (state, { payload }) => {
+      .addCase(fetchUserByName.rejected, (state, { payload }) => {
+        state.loading = false
+        state.error = payload as string
+      })
+      // UPDATE
+      .addCase(updateUser.pending, state => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateUser.fulfilled, (state, { payload }) => {
+        state.loading = false
+        const existingUser = state.items.find(u => u.id === payload.id)
+        if (existingUser) {
+          Object.assign(existingUser, payload)
+        } else {
+          state.items.push(payload)
+        }
+      })
+      .addCase(updateUser.rejected, (state, { payload }) => {
         state.loading = false
         state.error = payload as string
       })
@@ -155,4 +175,3 @@ const userSlice = createSlice({
 })
 
 export default userSlice.reducer
-    
