@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   if (existing) {
     // Update data yang sudah ada
     const updated = await prisma.websiteProfile.update({
-      where: { name: existing.name },
+      where: { id: existing.id },
       data: {
         name: body.name,
         description: body.description,
