@@ -1,6 +1,7 @@
 import { JSX, useState, useEffect, useRef, ReactNode } from "react";
 import { FaBars, FaTimes, FaMoon, FaSun, FaChevronDown } from "react-icons/fa";
 import Link from 'next/link';
+import Image from "next/image";
 import ButtonUser from "./atoms/ButtonUser";
 
 export type SubNavItem = { name: string; path: string };
@@ -25,8 +26,8 @@ export type NavbarProps = {
 
 export default function Navbar({
   navItems,
-  logoSrc = "/icon.svg",
-  brandName = "PathGrow",
+  logoSrc = "/icon.png",
+  brandName = "Biji Code",
   defaultTheme,
   onThemeChange,
   isMenuOpen: controlledMenu,
@@ -89,16 +90,16 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between p-3">
         {/* Logo + Brand */}
         <Link href="/" className="flex items-center space-x-2">
-          {logoSrc && (
-            <img
-              src={logoSrc}
-              alt="Logo"
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          )}
+          <Image
+            src={logoSrc}
+            alt="Logo"
+            width={60}
+            height={60}
+            className="h-13 w-13 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+          />
           <span className="font-bold text-xl dark:text-white">{brandName}</span>
         </Link>
 

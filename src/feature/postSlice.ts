@@ -8,7 +8,6 @@ export interface Post {
   slug: string
   content: string
   thumbnail?: string
-  status: 'DRAFT' | 'PUBLISHED'
   tags: string[]
   categories: { id: string; name: string }[]
   createdAt: string
@@ -62,12 +61,9 @@ export const fetchPostById = createAsyncThunk<Post, string>(
 
 export const createPost = createAsyncThunk<Post,
   {
-    authorId: string
     title: string
-    slug: string
     content: string
     thumbnail?: string
-    status?: 'DRAFT' | 'PUBLISHED'
     tags?: string[]
     categoryIds?: string[]
   }
@@ -98,10 +94,8 @@ export const updatePost = createAsyncThunk<Post,
   {
     id: string
     title: string
-    slug: string
     content: string
     thumbnail?: string
-    status?: 'DRAFT' | 'PUBLISHED'
     tags?: string[]
     categoryIds?: string[]
   }

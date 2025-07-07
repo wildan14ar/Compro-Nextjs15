@@ -14,39 +14,11 @@ datasource db {
   directUrl = env("DIRECT_URL") // Used for migrations
 }
 
-model WebsiteProfile {
-  id          String  @id @default("singleton")
-  name        String
-  description String?
-  logoUrl     String?
-  address     String?
-  phone       String?
-  email       String?
-  socialLinks Json?
-  gallery     Json?
-
-  isUserRegistrationEnabled Boolean @default(true)
-  isBlogEnabled             Boolean @default(true)
-  isProductEnabled          Boolean @default(true)
-  isCommentEnabled          Boolean @default(true)
-  isLikeEnabled             Boolean @default(true)
-  isReviewEnabled           Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 enum UserRole {
   SUPER_ADMIN
   MANAGER
   ADMIN
   MEMBER
-}
-
-enum Status {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
 }
 
 model user {
@@ -125,12 +97,12 @@ model Post {
   authorId String?
   author   user?   @relation(fields: [authorId], references: [id])
 
-  title     String
-  slug      String   @unique
-  content   String?
-  thumbnail String?
-  status    Status   @default(DRAFT)
-  tags      String[] @default([])
+  title       String
+  slug        String   @unique
+  content     String?
+  thumbnail   String?
+  isPublished Boolean  @default(false)
+  tags        String[] @default([])
 
   attachments attachment[]
   categories  category[]

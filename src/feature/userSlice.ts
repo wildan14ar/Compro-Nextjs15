@@ -6,12 +6,18 @@ export interface User {
   userName: string
   fullName: string
   email: string
+  profile?: UserProfile
 }
 
 export interface UserProfile {
   firstName: string
   lastName: string
   bio: string
+  location: string
+  dateOfBirth: string
+  phoneNumber: string
+  avatarUrl: string
+  SosialLinks: JSON
 }
 
 interface UserState {
@@ -84,25 +90,6 @@ export const updateUser = createAsyncThunk<User,
   }
 )
 
-export const deleteUser = createAsyncThunk<string, string>(
-  'user/delete',
-  async (id, { rejectWithValue }) => {
-    try {
-      const res = await fetch(`/api/user/${id}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to delete user')
-      }
-      return id
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        return rejectWithValue(e.message)
-      }
-      return rejectWithValue('An unknown error occurred')
-    }
-  }
-)
-
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -155,19 +142,6 @@ const userSlice = createSlice({
         }
       })
       .addCase(updateUser.rejected, (state, { payload }) => {
-        state.loading = false
-        state.error = payload as string
-      })
-      // DELETE
-      .addCase(deleteUser.pending, state => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(deleteUser.fulfilled, (state, { payload }) => {
-        state.loading = false
-        state.items = state.items.filter(u => u.id !== payload)
-      })
-      .addCase(deleteUser.rejected, (state, { payload }) => {
         state.loading = false
         state.error = payload as string
       })
