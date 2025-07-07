@@ -1,6 +1,7 @@
 "use client";
 
 import { Geist, Geist_Mono } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import { Provider as ReduxProvider } from "react-redux";
 import { usePathname } from "next/navigation";
 import { store } from "@/app/store";
@@ -26,7 +27,7 @@ export default function RootLayout({
   const pathname = usePathname();
 
   // Daftar path yang memang ada halaman (dan ingin kita tampilkan Navbar)
-  const validPaths = ["/", "/about", "/contact", "/blog", "/products"];
+  const validPaths = ["/", "/about", "/contact", "/post"];
   const showNavbar = validPaths.includes(pathname);
 
   return (
@@ -34,20 +35,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxProvider store={store}>
-          {showNavbar && (
-            <Navbar
-              navItems={[
-                { name: "Home", path: "/" },
-                { name: "About", path: "/about" },
-                { name: "Contact", path: "/contact" },
-                { name: "Blog", path: "/blog" },
-                { name: "Products", path: "/products" },
-              ]}
-            />
-          )}
-          {children}
-        </ReduxProvider>
+        <SessionProvider>
+          <ReduxProvider store={store}>
+            {showNavbar && (
+              <Navbar
+                navItems={[
+                  { name: "Home", path: "/" },
+                  { name: "About", path: "/about" },
+                  { name: "Contact", path: "/contact" },
+                  { name: "Blog", path: "/post" },
+                ]}
+              />
+            )}
+            {children}
+          </ReduxProvider>
+        </SessionProvider>
       </body>
     </html>
   );
