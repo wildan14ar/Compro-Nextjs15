@@ -5,23 +5,17 @@ export default function Home() {
         Welcome to Compro Next.js
       </h1>
       <p className="text-lg text-center">
-        This is a sample application built with Next.js, Prisma, and Tailwind CSS.
+        This is a sample application built with Next.js, Prisma, and Tailwind
+        CSS.
       </p>
       <div className="flex flex-col items-center space-y-4">
-        <a
-          href="/about"
-          className="btn btn-primary"
-        >
+        <a href="/about" className="btn btn-primary">
           Learn More
         </a>
-        <a
-          href="/contact"
-          className="btn btn-secondary"
-        >
+        <a href="/contact" className="btn btn-secondary">
           Contact Us
         </a>
       </div>
-
     </div>
   );
 }
