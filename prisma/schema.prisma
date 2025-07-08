@@ -98,6 +98,7 @@ model Post {
   author   user?   @relation(fields: [authorId], references: [id])
 
   title       String
+  description String?
   slug        String   @unique
   content     String?
   thumbnail   String?

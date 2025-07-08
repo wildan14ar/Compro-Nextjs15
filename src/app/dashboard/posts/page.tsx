@@ -27,7 +27,7 @@ export default function PostListPage() {
           Daftar Post
         </h1>
         <Link
-          href="/dashboard/posts/create"
+          href="/dashboard/posts/new"
           className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
         >
           Tambah Post

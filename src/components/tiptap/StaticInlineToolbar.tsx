@@ -40,7 +40,7 @@ export default function StaticInlineToolbar({ editor }: { editor: Editor }) {
       onClick={action}
       aria-label={label}
     >
-      <Icon width={18} height={18} />
+      <Icon width={14} height={14} />
     </button>
   );
 
@@ -73,7 +73,7 @@ export default function StaticInlineToolbar({ editor }: { editor: Editor }) {
   };
 
   return (
-    <div className="toolbar flex h-full gap-3 p-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-xl border border-gray-200 dark:border-gray-700 items-center rounded-md overflow-x-auto">
+    <div className="toolbar flex h-full gap-3 p-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-xl border border-gray-200 dark:border-gray-700 items-center rounded-md overflow-x-auto">
       {/* Heading Selector */}
       <select
         value={currentHeading()}

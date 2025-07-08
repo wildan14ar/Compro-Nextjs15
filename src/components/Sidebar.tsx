@@ -33,8 +33,8 @@ type SidebarProps = {
 export default function Sidebar({
   menuItems,
   isOpen: controlledOpen,
-  logoSrc = "/icon.svg",
-  brandName = "PathGrow",
+  logoSrc = "/icon.png",
+  brandName = "Biji Code",
   defaultOpen = true,
   onOpenChange,
   width = 256,
@@ -72,9 +72,9 @@ export default function Sidebar({
               <Image
                 src={logoSrc}
                 alt="Logo"
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full"
+                width={60}
+                height={60}
+                className="h-13 w-13 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
               />
               <span className="font-bold text-xl dark:text-white">
                 {brandName}

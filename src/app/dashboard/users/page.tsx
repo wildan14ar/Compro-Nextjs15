@@ -71,7 +71,7 @@ export default function UserListPage() {
                   {Array.isArray(user.role) ? user.role.join(", ") : user.role}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">
-                  <Link href={`/users/${user.id}`}>
+                  <Link href={`/user/${user.userName}`}>
                     <IdCardLanyard className="inline-block mr-2 text-blue-600 hover:text-blue-800 cursor-pointer" />
                   </Link>
                   <Trash2
