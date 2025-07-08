@@ -2,7 +2,7 @@
 
 import "@/styles/tiptap.css";
 import React, { useEffect, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -30,8 +30,14 @@ import { AiFillFileMarkdown } from "react-icons/ai";
 import { FaEdit } from "react-icons/fa";
 import { IoReader } from "react-icons/io5";
 
-export default function TiptapEditor() {
+export default function TiptapEditor({
+  onUpdate,
+}: {
+  /** Callback setiap kali content update, menerima JSONContent */
+  onUpdate?: (content: JSONContent) => void;
+}) {
   const [isEditable, setIsEditable] = useState(true);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -54,51 +60,24 @@ export default function TiptapEditor() {
     editable: isEditable,
   });
 
+  // Sinkronisasi editable state
   useEffect(() => {
     editor?.setEditable(isEditable);
   }, [editor, isEditable]);
 
-  const handleExportHTML = () => {
-    if (!editor) return;
-    const html = editor.getHTML();
-    downloadFile("content.html", html, "text/html");
-  };
+  // Kirim JSON ke parent setiap update
+  useEffect(() => {
+    if (!editor || !onUpdate) return;
+    const handler = () => {
+      onUpdate(editor.getJSON());
+    };
+    editor.on("update", handler);
+    return () => {
+      editor.off("update", handler);
+    };
+  }, [editor, onUpdate]);
 
-  const handleExportJSON = () => {
-    if (!editor) return;
-    const json = JSON.stringify(editor.getJSON(), null, 2);
-    downloadFile("content.json", json, "application/json");
-  };
-
-  const handleExportMarkdown = () => {
-    if (!editor) return;
-    const html = editor.getHTML();
-    const turndownService = new TurndownService();
-    const markdown = turndownService.turndown(html);
-    downloadFile("content.md", markdown, "text/markdown");
-  };
-
-  const handleExportDocx = async () => {
-    if (!editor) return;
-    const html = editor.getHTML();
-    const turndownService = new TurndownService();
-    const markdown = turndownService.turndown(html);
-
-    // Convert Markdown lines to simple paragraphs
-    const paragraphs = markdown
-      .split(/\r?\n+/)
-      .map((line) => new Paragraph(line));
-    const doc = new Document({
-      sections: [{ properties: {}, children: paragraphs }],
-    });
-    const blob = await Packer.toBlob(doc);
-    downloadFile(
-      "content.docx",
-      blob,
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    );
-  };
-
+  // Eksport berbagai format
   const downloadFile = (
     filename: string,
     content: string | Blob,
@@ -112,6 +91,41 @@ export default function TiptapEditor() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportHTML = () => {
+    if (!editor) return;
+    downloadFile("content.html", editor.getHTML(), "text/html");
+  };
+
+  const handleExportJSON = () => {
+    if (!editor) return;
+    const json = JSON.stringify(editor.getJSON(), null, 2);
+    downloadFile("content.json", json, "application/json");
+  };
+
+  const handleExportMarkdown = () => {
+    if (!editor) return;
+    const html = editor.getHTML();
+    const turndownService = new TurndownService();
+    const md = turndownService.turndown(html);
+    downloadFile("content.md", md, "text/markdown");
+  };
+
+  const handleExportDocx = async () => {
+    if (!editor) return;
+    const html = editor.getHTML();
+    const turndownService = new TurndownService();
+    const md = turndownService.turndown(html);
+
+    const paragraphs = md.split(/\r?\n+/).map((line) => new Paragraph(line));
+    const doc = new Document({ sections: [{ children: paragraphs }] });
+    const blob = await Packer.toBlob(doc);
+    downloadFile(
+      "content.docx",
+      blob,
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
   };
 
   if (!editor) return null;
@@ -147,7 +161,6 @@ export default function TiptapEditor() {
               <SiGoogledocs />
             </button>
           </div>
-          {/* Toggle Edit/View Mode */}
           <button
             onClick={() => setIsEditable(!isEditable)}
             className="h-full py-3 px-4 bg-purple-600 text-white rounded shadow hover:bg-purple-700 transition"
@@ -172,11 +185,7 @@ export default function TiptapEditor() {
           stroke="currentColor"
           className="w-6 h-6"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M4 10h16M4 14h16"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 10h16M4 14h16" />
         </svg>
       </DragHandle>
 

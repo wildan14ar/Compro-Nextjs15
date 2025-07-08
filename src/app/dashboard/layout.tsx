@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Sidebar from "@/components/Sidebar";
-import { Home, NotebookText, BookUser } from "lucide-react";
+import { Home, NotebookText, UserCog} from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -24,9 +24,9 @@ export default function DashboardLayout({
               icon: <Home className="h-5 w-5" />,
             },
             {
-              name: "User",
+              name: "Users",
               href: "/dashboard/users",
-              icon: <BookUser className="h-5 w-5" />,
+              icon: <UserCog size={18} />,
             },
             {
               name: "Post",

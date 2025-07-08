@@ -7,7 +7,7 @@ export interface Post {
   title: string
   slug: string
   description: string
-  content: string
+  content: JSON | string // Tipe konten bisa JSON atau string
   thumbnail?: string
   tags: string[]
   categories: { id: string; name: string }[]

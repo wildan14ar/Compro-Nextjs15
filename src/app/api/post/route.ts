@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
+import { randomInt } from 'node:crypto';
 
 export async function GET() {
   try {
@@ -23,25 +24,31 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
-  if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
+  if (!token || !token.sub || !token.role || !token.role.includes('SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const {
       title,
-      slug,
+      description,
       content,
       thumbnail,
       tags = [],
       categoryIds = [],
     } = await req.json();
 
+    const slug = randomInt(1, 100000) + '-' + title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
     const newPost = await prisma.post.create({
       data: {
         authorId: token.sub,
+        slug: slug,
+        description,
         title,
-        slug,
         content,
         thumbnail,
         tags,
