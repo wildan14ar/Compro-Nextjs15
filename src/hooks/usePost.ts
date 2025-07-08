@@ -18,11 +18,21 @@ export function usePosts() {
   }
 
   const addPost = (payload: Post) => {
-    dispatch(createPost(payload))
+    // Ensure content is a string before dispatching
+    const safePayload = {
+      ...payload,
+      content: typeof payload.content === 'string' ? payload.content : JSON.stringify(payload.content),
+    }
+    dispatch(createPost(safePayload))
   }
 
   const editPost = (payload: Post) => {
-    dispatch(updatePost(payload))
+    // Ensure content is a string before dispatching
+    const safePayload = {
+      ...payload,
+      content: typeof payload.content === 'string' ? payload.content : JSON.stringify(payload.content),
+    }
+    dispatch(updatePost(safePayload))
   }
 
   const removePost = (id: string) => {

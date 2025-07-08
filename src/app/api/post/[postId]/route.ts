@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
+import { randomInt } from 'node:crypto';
 
 export async function GET(req: NextRequest, { params }: { params: { postId: string } }) {
   const { postId } = params;
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: { postId: stri
 
 export async function PUT(req: NextRequest, { params }: { params: { postId: string } }) {
   const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
-  if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
+  if (!token || !token.sub || !token.role || !token.role.includes('SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -36,10 +37,9 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
   try {
     const {
       title,
-      slug,
+      description,
       content,
       thumbnail,
-      status,
       tags,
       categorypostIds,
     } = await req.json();
@@ -53,14 +53,19 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const slug = randomInt(1, 100000) + '-' + title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
     const updated = await prisma.post.update({
       where: { id: postId },
       data: {
         title,
         slug,
+        description,
         content,
         thumbnail,
-        status,
         tags,
         categories: categorypostIds
           ? { set: categorypostIds.map((cpostId: string) => ({ postId: cpostId })) }
@@ -79,13 +84,15 @@ export async function PUT(req: NextRequest, { params }: { params: { postId: stri
   }
 }
 
+
+
 export async function DELETE(req: NextRequest, { params }: { params: { postId: string } }) {
   const { postId } = params;
   const token = await getToken({ req }) as { sub?: string; role?: string[] } | null;
   if (!token || !token.sub || !token.role || !token.role.includes('MANAGER')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Check if post exists
   const existingPost = await prisma.post.findUnique({ where: { id: postId } });
   if (!existingPost) {
