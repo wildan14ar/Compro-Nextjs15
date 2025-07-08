@@ -8,8 +8,9 @@ const guestRoutes = ["/login", "/register"];
 
 // Routes untuk protected (harus login + cek role)
 const protectedRoutes = [
-  { path: "/admin",     roles: ["SUPER_ADMIN", "ADMIN"] },
+  { path: "/admin", roles: ["SUPER_ADMIN", "ADMIN"] },
   { path: "/dashboard", roles: ["SUPER_ADMIN", "USER"] },
+  { path: "/dashboard/users", roles: ["SUPER_ADMIN"] },
 ];
 
 export async function middleware(req: NextRequest) {

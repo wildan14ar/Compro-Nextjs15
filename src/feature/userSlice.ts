@@ -6,6 +6,7 @@ export interface User {
   userName: string
   fullName: string
   email: string
+  role: string | string[] // Bisa string atau array string
   profile?: UserProfile
 }
 

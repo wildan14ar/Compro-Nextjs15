@@ -6,6 +6,7 @@ export interface Post {
   authorId: string
   title: string
   slug: string
+  description: string
   content: string
   thumbnail?: string
   tags: string[]
