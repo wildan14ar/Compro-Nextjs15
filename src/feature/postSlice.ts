@@ -27,7 +27,7 @@ const initialState: PostState = {
 }
 
 // — Thunks dengan inline fetch
-export const fetchPost = createAsyncThunk<Post[]>(
+export const fetchPosts = createAsyncThunk<Post[]>(
   'post/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
@@ -148,15 +148,15 @@ const postSlice = createSlice({
   extraReducers: builder => {
     builder
       // FETCH
-      .addCase(fetchPost.pending, state => {
+      .addCase(fetchPosts.pending, state => {
         state.loading = true
         state.error = null
       })
-      .addCase(fetchPost.fulfilled, (state, { payload }) => {
+      .addCase(fetchPosts.fulfilled, (state, { payload }) => {
         state.loading = false
         state.items = payload
       })
-      .addCase(fetchPost.rejected, (state, { payload }) => {
+      .addCase(fetchPosts.rejected, (state, { payload }) => {
         state.loading = false
         state.error = payload as string
       })

@@ -33,7 +33,7 @@ const initialState: UserState = {
 }
 
 // — Thunks dengan inline fetch
-export const fetchUser = createAsyncThunk<User[]>(
+export const fetchUsers = createAsyncThunk<User[]>(
   'user/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
@@ -97,15 +97,15 @@ const userSlice = createSlice({
   extraReducers: builder => {
     builder
       // FETCH
-      .addCase(fetchUser.pending, state => {
+      .addCase(fetchUsers.pending, state => {
         state.loading = true
         state.error = null
       })
-      .addCase(fetchUser.fulfilled, (state, { payload }) => {
+      .addCase(fetchUsers.fulfilled, (state, { payload }) => {
         state.loading = false
         state.items = payload
       })
-      .addCase(fetchUser.rejected, (state, { payload }) => {
+      .addCase(fetchUsers.rejected, (state, { payload }) => {
         state.loading = false
         state.error = payload as string
       })
